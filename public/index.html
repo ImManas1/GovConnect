@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovConnect — Government of Maharashtra Interoperability Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-bg: #0b192c;
+      --sidebar-hover: #142844;
+      --sidebar-active: #1e3a5f;
+      --canvas-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --card-hover-border: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --dept-tag: #9a6808;
+      --primary: #0f3d64;
+      --primary-dark: #0a2540;
+      --accent: #f59e0b;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+      --shadow-hover: 0 10px 20px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    html, body { height: 100%; width: 100%; }
+    body { background-color: var(--canvas-bg); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+    /* ========================================================= */
+    /* LEFT SIDEBAR NAVIGATION                                   */
+    /* ========================================================= */
+    aside { width: 260px; background: var(--sidebar-bg); color: #ffffff; display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 40; border-right: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease; }
+    
+    .brand-section { padding: 24px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .brand-logo { width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.15rem; color: #0b192c; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); }
+    .brand-title h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em; color: #ffffff; line-height: 1.2; }
+    .brand-title p { font-size: 0.72rem; color: #94a3b8; font-weight: 500; }
+
+    .nav-list { list-style: none; padding: 20px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+    .nav-item button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: transparent; border: none; border-radius: 8px; color: #cbd5e1; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+    .nav-item button:hover { background: var(--sidebar-hover); color: #ffffff; transform: translateX(2px); }
+    .nav-item button.active { background: var(--sidebar-active); color: #ffffff; box-shadow: inset 3px 0 0 #f59e0b; }
+    .nav-icon { font-size: 1.1rem; opacity: 0.9; }
+
+    /* Citizen Profile in Sidebar */
+    .sidebar-profile { padding: 16px 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; }
+    .user-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .user-avatar { width: 36px; height: 36px; background: #1e3a5f; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #f59e0b; border: 1.5px solid rgba(245, 158, 11, 0.4); flex-shrink: 0; }
+    .user-meta { min-width: 0; overflow: hidden; }
+    .user-meta h4 { font-size: 0.82rem; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-meta p { font-size: 0.68rem; color: #94a3b8; }
+    .btn-switch-user { background: none; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 6px; padding: 5px 10px; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
+    .btn-switch-user:hover { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.4); }
+
+    /* Mobile Header Toggle */
+    .mobile-header { display: none; background: var(--sidebar-bg); color: white; padding: 12px 20px; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .mobile-menu-btn { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+
+    /* ========================================================= */
+    /* MAIN CONTENT CANVAS & RESPONSIVE SCALING                  */
+    /* ========================================================= */
+    main { margin-left: 260px; flex: 1; padding: 32px 40px; max-width: 1280px; width: calc(100% - 260px); transition: all 0.3s ease; }
+
+    .view-panel { display: none; }
+    .view-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Search Bar */
+    .search-wrapper { position: relative; margin-bottom: 20px; }
+    .search-input { width: 100%; padding: 14px 20px 14px 48px; background: #ffffff; border: 1.5px solid var(--card-border); border-radius: 12px; font-size: 0.92rem; color: var(--text-main); outline: none; transition: all 0.2s ease; box-shadow: var(--shadow-subtle); }
+    .search-input:focus { border-color: #0f3d64; box-shadow: 0 0 0 3px rgba(15, 61, 100, 0.08); }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.05rem; color: var(--text-muted); pointer-events: none; }
+
+    /* Category Filter Chips */
+    .category-chips { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+    .chip { padding: 8px 18px; border-radius: 24px; border: 1.5px solid var(--card-border); background: #ffffff; color: var(--text-main); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .chip:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .chip.active { background: #0b192c; color: #ffffff; border-color: #0b192c; box-shadow: 0 2px 6px rgba(11, 25, 44, 0.2); }
+
+    /* Service Sections */
+    .section-title { font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 28px 0 14px 0; }
+    .section-title:first-of-type { margin-top: 0; }
+
+    .service-cards-list { display: flex; flex-direction: column; gap: 14px; }
+    
+    /* Service Card Layout */
+    .service-card { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: 12px; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; transition: all 0.2s ease; box-shadow: var(--shadow-subtle); }
+    .service-card:hover { border-color: var(--card-hover-border); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+    
+    .dept-tag { font-size: 0.72rem; font-weight: 800; color: var(--dept-tag); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block; }
+    .service-title { font-size: 1.02rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .service-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+
+    .btn-view-details { padding: 10px 22px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0; }
+    .btn-view-details:hover { background: #0b192c; color: #ffffff; border-color: #0b192c; box-shadow: 0 4px 10px rgba(11, 25, 44, 0.15); }
+
+    /* ========================================================= */
+    /* APPLICATION DRAWER & MODAL STYLING                        */
+    /* ========================================================= */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(11, 25, 44, 0.7); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(5px); padding: 16px; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-box { background: #ffffff; border-radius: 16px; max-width: 580px; width: 100%; padding: 28px 32px; box-shadow: var(--shadow-lg); position: relative; max-height: 90vh; overflow-y: auto; }
+
+    .modal-close { position: absolute; right: 24px; top: 24px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .modal-close:hover { background: #e2e8f0; color: var(--text-main); }
+
+    .modal-header-tag { font-size: 0.72rem; font-weight: 800; color: var(--dept-tag); text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .modal-header-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .modal-header-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; }
+
+    .required-data-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin: 20px 0; }
+    .required-data-box h4 { font-size: 0.78rem; font-weight: 700; color: var(--text-main); text-transform: uppercase; margin-bottom: 8px; }
+    .attr-pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .attr-pill { background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; color: #0f3d64; }
+
+    .consent-card { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; display: flex; gap: 12px; align-items: flex-start; }
+    .consent-card input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: #059669; flex-shrink: 0; }
+    .consent-card p { font-size: 0.8rem; color: #166534; line-height: 1.45; }
+
+    .btn-apply-submit { width: 100%; padding: 14px; background: #0b192c; color: #ffffff; border: none; border-radius: 10px; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-apply-submit:hover { background: #142844; box-shadow: 0 4px 12px rgba(11, 25, 44, 0.2); }
+
+    /* Verification Outcome Box */
+    .verification-result { margin-top: 20px; padding: 16px; border-radius: 10px; display: none; }
+    .result-success { background: var(--success-bg); border: 1.5px solid #a7f3d0; color: #065f46; }
+    .result-failed { background: var(--danger-bg); border: 1.5px solid #fecaca; color: #991b1b; }
+
+    /* ========================================================= */
+    /* TABLES & DASHBOARD COMPONENTS                             */
+    /* ========================================================= */
+    .table-card { background: #ffffff; border: 1.5px solid var(--card-border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-subtle); margin-top: 16px; }
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+    th { background: #f8fafc; padding: 14px 18px; font-weight: 700; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; border-bottom: 1.5px solid var(--card-border); white-space: nowrap; }
+    td { padding: 16px 18px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-approved { background: var(--success-bg); color: var(--success); }
+    .badge-unmet { background: var(--danger-bg); color: var(--danger); }
+    .badge-pending { background: #fef3c7; color: #b45309; }
+
+    /* Live Terminal Inspector (SIH Diagnostic Tab) */
+    .terminal-box { background: #0b1120; border-radius: 12px; padding: 20px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; height: 440px; overflow-y: auto; line-height: 1.6; box-shadow: var(--shadow-subtle); border: 1px solid #1e293b; }
+    .terminal-box p { margin-bottom: 6px; word-break: break-all; }
+    .t-step { color: #f59e0b; font-weight: 600; }
+    .t-pass { color: #34d399; }
+    .t-fail { color: #f87171; }
+    .t-info { color: #38bdf8; }
+
+    /* ========================================================= */
+    /* RESPONSIVE BREAKPOINTS & MOBILE SCALING FIXES              */
+    /* ========================================================= */
+    @media (max-width: 992px) {
+      aside { transform: translateX(-100%); }
+      aside.mobile-open { transform: translateX(0); }
+      .mobile-header { display: flex; }
+      main { margin-left: 0; width: 100%; padding: 80px 20px 32px 20px; }
+      .service-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .btn-view-details { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE TOP HEADER (VISIBLE ON SMALL SCREENS) -->
+  <div class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="brand-logo" style="width: 32px; height: 32px; font-size: 0.95rem;">GC</div>
+      <span style="font-weight: 800; font-size: 1rem;">GovConnect</span>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <aside id="sidebarNav">
+    <div class="brand-section">
+      <div class="brand-logo">GC</div>
+      <div class="brand-title">
+        <h1>GovConnect</h1>
+        <p>Government of Maharashtra</p>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item">
+        <button class="active" onclick="switchNav('services', this)">
+          <span class="nav-icon">⊞</span> Services Directory
+        </button>
+      </li>
+      <li class="nav-item">
+        <button onclick="switchNav('applications', this)">
+          <span class="nav-icon">☑</span> My Applications
+        </button>
+      </li>
+      <li class="nav-item">
+        <button onclick="switchNav('official', this)">
+          <span class="nav-icon">🏛</span> Department Desk
+        </button>
+      </li>
+      <li class="nav-item">
+        <button onclick="switchNav('inspector', this)">
+          <span class="nav-icon">⚡</span> System Inspector (SIH)
+        </button>
+      </li>
+    </ul>
+
+    <!-- Bottom Profile -->
+    <div class="sidebar-profile">
+      <div class="user-info">
+        <div class="user-avatar" id="sbAvatar">AS</div>
+        <div class="user-meta">
+          <h4 id="sbName">Aarav Sharma</h4>
+          <p id="sbId">CITIZEN-101</p>
+        </div>
+      </div>
+      <button class="btn-switch-user" onclick="openCustomCitizenModal()">Switch</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CANVAS -->
+  <main>
+
+    <!-- VIEW 1: SERVICES DIRECTORY -->
+    <section id="view-services" class="view-panel active">
+      
+      <!-- Search -->
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search services — e.g. scholarship, income certificate, driving license, MSME..." oninput="filterServices()">
+      </div>
+
+      <!-- Categories -->
+      <div class="category-chips">
+        <button class="chip active" onclick="filterCategory('ALL', this)">All</button>
+        <button class="chip" onclick="filterCategory('EDUCATION', this)">Education</button>
+        <button class="chip" onclick="filterCategory('CERTIFICATES', this)">Certificates</button>
+        <button class="chip" onclick="filterCategory('INNOVATION', this)">Startup & Innovation</button>
+        <button class="chip" onclick="filterCategory('TRANSPORT', this)">Transport</button>
+        <button class="chip" onclick="filterCategory('AGRICULTURE', this)">Agriculture</button>
+        <button class="chip" onclick="filterCategory('EMPLOYMENT', this)">Employment</button>
+      </div>
+
+      <!-- Services List -->
+      <div id="servicesContainer">
+
+        <!-- EDUCATION -->
+        <div class="service-category-group" data-category="EDUCATION">
+          <div class="section-title">Education & Scholarships</div>
+          <div class="service-cards-list">
+            
+            <div class="service-card" data-title="Maharashtra Government Scholarship Post-Matric" data-dept="HIGHER & TECHNICAL EDUCATION DEPT">
+              <div>
+                <span class="dept-tag">Higher & Technical Education Dept</span>
+                <div class="service-title">Maharashtra Government Scholarship (Post-Matric)</div>
+                <div class="service-desc">Financial assistance for eligible students pursuing recognized degree courses across Maharashtra institutions.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('MAHADBT_SCHOLARSHIP')">View details</button>
+            </div>
+
+            <div class="service-card" data-title="Technical Education Fee Waiver Tuition" data-dept="HIGHER & TECHNICAL EDUCATION DEPT">
+              <div>
+                <span class="dept-tag">Higher & Technical Education Dept</span>
+                <div class="service-title">Technical Education Assistance Scheme</div>
+                <div class="service-desc">Tuition fee reimbursement support for students enrolled in engineering and polytechnic diplomas.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('MAHADBT_SCHOLARSHIP')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CERTIFICATES & REVENUE -->
+        <div class="service-category-group" data-category="CERTIFICATES">
+          <div class="section-title">Certificates & Revenue Registry</div>
+          <div class="service-cards-list">
+
+            <div class="service-card" data-title="Income Certificate Revenue Domicile" data-dept="REVENUE DEPARTMENT">
+              <div>
+                <span class="dept-tag">Revenue Department</span>
+                <div class="service-title">Income Certificate Verification & Endorsement</div>
+                <div class="service-desc">State revenue certificate of annual family income, utilized for cross-department subsidy and scholarship eligibility.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('INCOME_CERTIFICATE')">View details</button>
+            </div>
+
+            <div class="service-card" data-title="Caste Certificate Category Verification" data-dept="REVENUE DEPARTMENT">
+              <div>
+                <span class="dept-tag">Revenue Department</span>
+                <div class="service-title">Caste Certificate Endorsement</div>
+                <div class="service-desc">Certifies social category for welfare schemes and statutory educational reservations.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('INCOME_CERTIFICATE')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- STARTUP & INNOVATION -->
+        <div class="service-category-group" data-category="INNOVATION">
+          <div class="section-title">Startup & Youth Innovation</div>
+          <div class="service-cards-list">
+
+            <div class="service-card" data-title="MSInS Youth Entrepreneurship Seed Fund Grant" data-dept="MAHARASHTRA STATE INNOVATION SOCIETY">
+              <div>
+                <span class="dept-tag">Maharashtra State Innovation Society (MSInS)</span>
+                <div class="service-title">MSInS Youth Entrepreneurship Seed Grant</div>
+                <div class="service-desc">Seed capital subsidy up to ₹2.5 Lakh for young technical graduates establishing innovation ventures.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('MSINS_SUBSIDY')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TRANSPORT -->
+        <div class="service-category-group" data-category="TRANSPORT">
+          <div class="section-title">Transport & Licensing</div>
+          <div class="service-cards-list">
+
+            <div class="service-card" data-title="Learner's Driving License RTO Transport" data-dept="MOTOR VEHICLES DEPARTMENT (RTO)">
+              <div>
+                <span class="dept-tag">Motor Vehicles Department (RTO)</span>
+                <div class="service-title">Learner's Driving License (Instant Issue)</div>
+                <div class="service-desc">Instant issuance of learner's driving permit. Age verified automatically via Education Board registry without exposing academic marks.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('RTO_LICENSE')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AGRICULTURE -->
+        <div class="service-category-group" data-category="AGRICULTURE">
+          <div class="section-title">Agriculture & Farmer Welfare</div>
+          <div class="service-cards-list">
+
+            <div class="service-card" data-title="Drip Irrigation Subsidy Land Punjabrao Deshmukh" data-dept="DEPARTMENT OF AGRICULTURE">
+              <div>
+                <span class="dept-tag">Department of Agriculture</span>
+                <div class="service-title">Dr. Punjabrao Deshmukh Drip Irrigation Subsidy</div>
+                <div class="service-desc">80% financial subsidy for installing micro-irrigation systems. Verified directly against 7/12 land records.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('KRISHI_SUBSIDY')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- EMPLOYMENT -->
+        <div class="service-category-group" data-category="EMPLOYMENT">
+          <div class="section-title">Employment & Industry</div>
+          <div class="service-cards-list">
+
+            <div class="service-card" data-title="Chief Minister Employment Generation Programme CMEGP Loan" data-dept="INDUSTRIES, ENERGY AND LABOUR DEPT">
+              <div>
+                <span class="dept-tag">Industries, Energy & Labour Department</span>
+                <div class="service-title">Chief Minister Employment Generation Programme (CMEGP)</div>
+                <div class="service-desc">Financial loan assistance for micro-enterprise establishment with state margin money subsidy.</div>
+              </div>
+              <button class="btn-view-details" onclick="openApplyModal('CMEGP_LOAN')">View details</button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: MY APPLICATIONS -->
+    <section id="view-applications" class="view-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2 style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">My Submitted Applications</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Real-time tracking powered by GovConnect Federated Middleware</p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Application ID</th>
+                <th>Service Name</th>
+                <th>Department</th>
+                <th>Submission Mode</th>
+                <th>Status</th>
+                <th>Turnaround</th>
+              </tr>
+            </thead>
+            <tbody id="myApplicationsTable">
+              <tr>
+                <td><strong style="color:#0f3d64;">MH-GC-84213</strong></td>
+                <td>Maharashtra Government Scholarship</td>
+                <td>Higher & Technical Education</td>
+                <td>Zero-Upload (M2M)</td>
+                <td><span class="status-badge badge-approved">✓ Auto-Approved</span></td>
+                <td>18 ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: OFFICIAL DESK -->
+    <section id="view-official" class="view-panel">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">Department Official Desk</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Cross-department consolidated intake queue — Zero manual PDF inspection</p>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Citizen ID</th>
+                <th>Consuming Department</th>
+                <th>Service</th>
+                <th>GovConnect Attestation</th>
+                <th>Decision</th>
+              </tr>
+            </thead>
+            <tbody id="officialQueueTable">
+              <tr>
+                <td><strong>Aarav Sharma</strong></td>
+                <td><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">CITIZEN-101</span></td>
+                <td>MSInS (Innovation)</td>
+                <td>Youth Seed Fund Grant</td>
+                <td><span class="status-badge badge-approved">✓ Verified Claims Ingested</span></td>
+                <td><strong style="color: #059669;">Auto-Approved</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: SYSTEM INSPECTOR -->
+    <section id="view-inspector" class="view-panel">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">GovConnect Bus Inspector</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">SIH Evaluator Diagnostic: Live XML-to-JSON normalization & M2M telemetry</p>
+      </div>
+
+      <div class="terminal-box" id="inspectorTerminal">
+        <p class="t-info">[STANDBY] GovConnect Interoperability Bus listening on port 5000...</p>
+        <p class="t-info">[CONNECTORS] Revenue Dept (SOAP/XML on :4001) | Education Dept (REST/JSON on :4002)</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: ZERO-UPLOAD SERVICE APPLICATION                    -->
+  <!-- ========================================================= -->
+  <div id="applyModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeApplyModal()">✕</button>
+
+      <span class="modal-header-tag" id="mDept">Department Name</span>
+      <h3 class="modal-header-title" id="mTitle">Service Title</h3>
+      <p class="modal-header-desc" id="mDesc">Description</p>
+
+      <div class="required-data-box">
+        <h4>Attributes to be Fetched Directly via GovConnect:</h4>
+        <div class="attr-pill-row" id="mAttrRow"></div>
+      </div>
+
+      <div class="consent-card">
+        <input type="checkbox" id="mConsent" checked>
+        <p><strong>1-Click Consent:</strong> I authorize the Government of Maharashtra to exchange my verified records between state registries. No physical paperwork required.</p>
+      </div>
+
+      <button class="btn-apply-submit" id="btnSubmitApply" onclick="executeApplicationFlow()">
+        <span>Authorize & Submit (Instant M2M Validation)</span> ➔
+      </button>
+
+      <div id="mResultBox" class="verification-result"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: SWITCH / ADD CITIZEN -->
+  <div id="switchModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeCustomCitizenModal()">✕</button>
+      <h3 class="modal-header-title">Select or Inject Test Citizen</h3>
+      <p class="modal-header-desc">Test real-time dynamic profiles across Mock XML & JSON registries.</p>
+
+      <div style="margin: 20px 0;">
+        <label style="font-size: 0.8rem; font-weight: 700; display: block; margin-bottom: 6px;">Pre-Configured Test Profiles:</label>
+        <select id="presetCitizenSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.88rem;" onchange="loadPresetCitizen(this.value)">
+          <option value="CITIZEN-101">Aarav Sharma (B.Tech • Income: ₹1.8L • OBC • Age: 22)</option>
+          <option value="CITIZEN-102">Priya Deshmukh (B.A. • Income: ₹4.5L • OPEN • Age: 25)</option>
+        </select>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+      <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 12px;">Or Create Live Dynamic Citizen:</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <input type="text" id="custName" placeholder="Full Name" value="Sneha Patil" style="padding: 9px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <input type="text" id="custId" placeholder="Citizen ID" value="CITIZEN-999" style="padding: 9px; border-radius: 6px; border: 1px solid #cbd5e1;">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <input type="number" id="custIncome" placeholder="Income (₹)" value="210000" style="padding: 9px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <input type="text" id="custDegree" placeholder="Degree" value="B.Tech Computer Science" style="padding: 9px; border-radius: 6px; border: 1px solid #cbd5e1;">
+      </div>
+
+      <button class="btn-apply-submit" onclick="submitCustomCitizen()">Save into State Databases</button>
+    </div>
+  </div>
+
+  <script>
+    // Active Global State
+    let currentCitizen = {
+      id: "CITIZEN-101",
+      name: "Aarav Sharma"
+    };
+
+    let activeServiceKey = null;
+
+    const SERVICES_DATA = {
+      "MSINS_SUBSIDY": {
+        dept: "Maharashtra State Innovation Society (MSInS)",
+        name: "MSInS Youth Entrepreneurship Seed Grant",
+        desc: "Seed capital grant up to ₹2.5 Lakh for young technical graduates establishing innovation ventures.",
+        attrs: ["revenue.annualIncome", "education.degree", "education.dob"],
+        evaluator: (claims) => {
+          const inc = claims.verifiedAttributes.revenue?.annualIncome || 0;
+          const deg = claims.verifiedAttributes.education?.degree || "";
+          const ok = inc <= 250000 && deg.toLowerCase().includes("b.tech");
+          return { ok, reason: ok ? "Income (₹" + inc + ") under ₹2.5L and Technical Degree verified." : "Income exceeds ₹2.5L or non-technical degree." };
+        }
+      },
+      "RTO_LICENSE": {
+        dept: "Motor Vehicles Department (RTO)",
+        name: "Learner's Driving License (Instant Issue)",
+        desc: "Instant permit issue with strict Data Minimization — age verified from state board without exposing marks.",
+        attrs: ["education.dob"],
+        evaluator: (claims) => {
+          const age = claims.verifiedAttributes.education?.age || 0;
+          const ok = age >= 18;
+          return { ok, reason: ok ? `Age verified as ${age} years (>= 18). Complete data privacy maintained.` : `Applicant is under 18 (${age} yrs).` };
+        }
+      },
+      "MAHADBT_SCHOLARSHIP": {
+        dept: "Higher & Technical Education Dept",
+        name: "Maharashtra Government Scholarship (Post-Matric)",
+        desc: "Financial assistance for students pursuing higher technical courses across Maharashtra.",
+        attrs: ["revenue.annualIncome", "education.degree", "revenue.casteCategory"],
+        evaluator: (claims) => {
+          const inc = claims.verifiedAttributes.revenue?.annualIncome || 0;
+          const ok = inc <= 400000;
+          return { ok, reason: ok ? `Annual income (₹${inc}) satisfies the ₹4.0L ceiling.` : `Income exceeds ₹4.0L ceiling.` };
+        }
+      },
+      "KRISHI_SUBSIDY": {
+        dept: "Department of Agriculture",
+        name: "Dr. Punjabrao Deshmukh Drip Irrigation Subsidy",
+        desc: "Subsidy for micro-irrigation systems. Verified against 7/12 land records directly.",
+        attrs: ["revenue.landHoldingsAcre", "revenue.annualIncome"],
+        evaluator: (claims) => {
+          const land = claims.verifiedAttributes.revenue?.landHoldingsAcre || 0;
+          const ok = land >= 1.0;
+          return { ok, reason: ok ? `Land holding verified as ${land} Acres (>= 1.0 Acre required).` : `Land holdings (${land} Acres) below requirement.` };
+        }
+      },
+      "CMEGP_LOAN": {
+        dept: "Industries, Energy & Labour Department",
+        name: "Chief Minister Employment Generation Programme",
+        desc: "Margin money subsidy for micro-enterprises. Verified via employment and income databases.",
+        attrs: ["revenue.annualIncome", "education.dob"],
+        evaluator: (claims) => {
+          const inc = claims.verifiedAttributes.revenue?.annualIncome || 0;
+          const age = claims.verifiedAttributes.education?.age || 0;
+          const ok = inc <= 800000 && age >= 18;
+          return { ok, reason: ok ? `Applicant is an adult (${age} yrs) and family income is under ₹8.0L.` : `Criteria unmet for CMEGP loan.` };
+        }
+      },
+      "INCOME_CERTIFICATE": {
+        dept: "Revenue Department",
+        name: "Income Certificate Verification & Endorsement",
+        desc: "Official state revenue verification endorsement for cross-department use.",
+        attrs: ["revenue.annualIncome", "revenue.status"],
+        evaluator: (claims) => {
+          const inc = claims.verifiedAttributes.revenue?.annualIncome || 0;
+          return { ok: true, reason: `Revenue record confirmed: ₹${inc} per annum.` };
+        }
+      }
+    };
+
+    // Responsive Mobile Sidebar Toggle
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebarNav');
+      sidebar.classList.toggle('mobile-open');
+    }
+
+    // Navigation Switcher
+    function switchNav(viewId, btn) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item button').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${viewId}`).classList.add('active');
+      btn.classList.add('active');
+      
+      // Close mobile sidebar on navigate
+      document.getElementById('sidebarNav').classList.remove('mobile-open');
+    }
+
+    // Category Filter
+    function filterCategory(cat, chip) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+
+      document.querySelectorAll('.service-category-group').forEach(grp => {
+        if (cat === 'ALL' || grp.getAttribute('data-category') === cat) {
+          grp.style.display = 'block';
+        } else {
+          grp.style.display = 'none';
+        }
+      });
+    }
+
+    // Search Filter
+    function filterServices() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('.service-card').forEach(card => {
+        const text = (card.getAttribute('data-title') + " " + card.getAttribute('data-dept')).toLowerCase();
+        card.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    // Modal Handlers
+    function openApplyModal(serviceKey) {
+      activeServiceKey = serviceKey;
+      const s = SERVICES_DATA[serviceKey] || SERVICES_DATA["MSINS_SUBSIDY"];
+
+      document.getElementById('mDept').textContent = s.dept;
+      document.getElementById('mTitle').textContent = s.name;
+      document.getElementById('mDesc').textContent = s.desc;
+
+      const row = document.getElementById('mAttrRow');
+      row.innerHTML = '';
+      s.attrs.forEach(attr => {
+        const span = document.createElement('span');
+        span.className = 'attr-pill';
+        span.textContent = `● ${attr}`;
+        row.appendChild(span);
+      });
+
+      document.getElementById('mResultBox').style.display = 'none';
+      document.getElementById('btnSubmitApply').style.display = 'flex';
+      document.getElementById('applyModal').classList.add('open');
+    }
+
+    function closeApplyModal() { document.getElementById('applyModal').classList.remove('open'); }
+    function openCustomCitizenModal() { document.getElementById('switchModal').classList.add('open'); }
+    function closeCustomCitizenModal() { document.getElementById('switchModal').classList.remove('open'); }
+
+    // Backdrop & Escape key listeners for modals
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        closeApplyModal();
+        closeCustomCitizenModal();
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeApplyModal();
+        closeCustomCitizenModal();
+      }
+    });
+
+    function loadPresetCitizen(val) {
+      currentCitizen.id = val;
+      currentCitizen.name = val === 'CITIZEN-101' ? 'Aarav Sharma' : 'Priya Deshmukh';
+      document.getElementById('sbName').textContent = currentCitizen.name;
+      document.getElementById('sbId').textContent = currentCitizen.id;
+      document.getElementById('sbAvatar').textContent = currentCitizen.name.split(' ').map(n=>n[0]).join('');
+      closeCustomCitizenModal();
+    }
+
+    // EXECUTE PIPELINE
+    async function executeApplicationFlow() {
+      const s = SERVICES_DATA[activeServiceKey];
+      const consent = document.getElementById('mConsent').checked ? "JWT_CONSENT_OK" : null;
+      const term = document.getElementById('inspectorTerminal');
+
+      term.innerHTML += `<p class="t-step"><br>[TRANSACTION TRIGGERED] Consuming Dept: "${s.dept}" for "${s.name}"</p>`;
+
+      try {
+        const res = await fetch('/api/v1/interop/fetch-verified-claims', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            citizenId: currentCitizen.id,
+            consumingDepartment: s.dept,
+            serviceName: s.name,
+            requestedAttributes: s.attrs,
+            consentToken: consent
+          })
+        });
+
+        const data = await res.json();
+
+        // Stream to Inspector Tab
+        (data.auditLogs || [data.error]).forEach(l => {
+          const p = document.createElement('p');
+          p.textContent = l;
+          if (l.includes('SUCCESS') || l.includes('COMPLETE')) p.className = 't-pass';
+          else if (l.includes('ERROR') || l.includes('Blocked')) p.className = 't-fail';
+          else if (l.includes('STEP') || l.includes('DISPATCH')) p.className = 't-step';
+          else p.className = 't-info';
+          term.appendChild(p);
+        });
+        term.scrollTop = term.scrollHeight;
+
+        const resBox = document.getElementById('mResultBox');
+        resBox.style.display = 'block';
+
+        if (res.ok) {
+          const evalRes = s.evaluator(data.claimsPacket);
+          document.getElementById('btnSubmitApply').style.display = 'none';
+
+          if (evalRes.ok) {
+            resBox.className = 'verification-result result-success';
+            resBox.innerHTML = `
+              <h4 style="font-weight: 800; font-size: 0.95rem; margin-bottom: 4px;">✓ Application Instantly Approved (Zero-Upload)</h4>
+              <p style="font-size: 0.82rem;">${evalRes.reason}</p>
+              <p style="font-size: 0.72rem; margin-top: 8px; opacity: 0.8;">Attestation: ${data.claimsPacket.transactionId} • Verified in ${data.latencyMs}ms via GovConnect Bus.</p>
+            `;
+          } else {
+            resBox.className = 'verification-result result-failed';
+            resBox.innerHTML = `
+              <h4 style="font-weight: 800; font-size: 0.95rem; margin-bottom: 4px;">✗ Verified Claims Received — Criteria Unmet</h4>
+              <p style="font-size: 0.82rem;">${evalRes.reason}</p>
+            `;
+          }
+
+          // Prepend to Tables
+          addApplicationRow(s.name, s.dept, evalRes.ok, data.latencyMs);
+          addOfficialRow(currentCitizen.name, currentCitizen.id, s.dept, s.name, evalRes.ok);
+
+        } else {
+          resBox.className = 'verification-result result-failed';
+          resBox.innerHTML = `<h4 style="font-weight: 800;">✗ Request Blocked</h4><p>${data.error}</p>`;
+        }
+
+      } catch (err) {
+        alert("Pipeline error: " + err.message);
+      }
+    }
+
+    function addApplicationRow(serviceName, dept, ok, ms) {
+      const tbody = document.getElementById('myApplicationsTable');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong style="color:#0f3d64;">MH-GC-${Math.floor(10000 + Math.random()*90000)}</strong></td>
+        <td>${serviceName}</td>
+        <td>${dept}</td>
+        <td>Zero-Upload (M2M)</td>
+        <td><span class="status-badge ${ok ? 'badge-approved' : 'badge-unmet'}">${ok ? '✓ Auto-Approved' : '✗ Criteria Unmet'}</span></td>
+        <td>${ms} ms</td>
+      `;
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    function addOfficialRow(name, id, dept, service, ok) {
+      const tbody = document.getElementById('officialQueueTable');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${name}</strong></td>
+        <td><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">${id}</span></td>
+        <td>${dept}</td>
+        <td>${service}</td>
+        <td><span class="status-badge badge-approved">✓ Verified Claims Ingested</span></td>
+        <td><strong style="color: ${ok ? '#059669' : '#dc2626'};">${ok ? 'Auto-Approved' : 'Criteria Unmet'}</strong></td>
+      `;
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    async function submitCustomCitizen() {
+      const name = document.getElementById('custName').value;
+      const citizenId = document.getElementById('custId').value;
+      const income = document.getElementById('custIncome').value;
+      const degree = document.getElementById('custDegree').value;
+
+      try {
+        await fetch('/api/v1/interop/register-citizen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ citizenId, name, income, degree, dob: "2003-05-14", caste: "OBC", landHoldings: 2.0 })
+        });
+
+        currentCitizen.id = citizenId;
+        currentCitizen.name = name;
+        document.getElementById('sbName').textContent = name;
+        document.getElementById('sbId').textContent = citizenId;
+        document.getElementById('sbAvatar').textContent = name.split(' ').map(n=>n[0]).join('');
+
+        // Also add to preset dropdown
+        const sel = document.getElementById('presetCitizenSelect');
+        const opt = document.createElement('option');
+        opt.value = citizenId;
+        opt.textContent = `${name} (${degree} • ₹${income})`;
+        sel.insertBefore(opt, sel.firstChild);
+        sel.value = citizenId;
+
+        closeCustomCitizenModal();
+        alert(`✓ Dynamic Citizen ${name} (${citizenId}) injected into Mock XML & JSON registries.`);
+      } catch (e) {
+        alert("Registration failed: " + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

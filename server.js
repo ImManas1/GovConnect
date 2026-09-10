@@ -13,6 +13,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Explicit handler for the root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
 // 1. MASTER DATA MANAGEMENT (MDM) IDENTITY MAP
 const MDM_REGISTRY = {
   "CITIZEN-101": {
@@ -185,5 +191,11 @@ app.post('/api/v1/interop/fetch-verified-claims', async (req, res) => {
   }
 });
 
+// Catch-all route to serve index.html for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const PORT = 5000;
 app.listen(PORT, () => console.log(`[GOVCONNECT GATEWAY] Active on http://localhost:${PORT}`));
+

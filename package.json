@@ -5,10 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "mock:revenue": "node mock-services/revenue-legacy-service.js",
-    "mock:education": "node mock-services/education-service.js",
-    "dev": "concurrently \"node mock-services/revenue-legacy-service.js\" \"node mock-services/education-service.js\" \"node server.js\""
+    "start": "node mock-services/revenue-legacy-service.js & node mock-services/education-service.js & node server.js",
+    "dev": "node mock-services/revenue-legacy-service.js & node mock-services/education-service.js & node server.js"
   },
   "dependencies": {
     "axios": "^1.7.2",
